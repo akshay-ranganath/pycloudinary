@@ -41,3 +41,31 @@ class HttpClient:
             raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.status, body, e))
 
         return result
+
+    def post_json(self,
+                  url,
+                  body={},
+                  headers=None
+                  ):
+        try:
+            response = self._http_client.request("POST",
+                                                 url,
+                                                 body=body,
+                                                 headers={'Content-Type': 'application/json'},
+                                                 timeout=self.timeout)
+            body = response.data
+        except HTTPError as e:
+            raise GeneralError("Unexpected error %s" % str(e))
+        except socket.error as e:
+            raise GeneralError("Socket Error: %s" % str(e))
+
+        if response.status != 200:
+            raise GeneralError("Server returned unexpected status code - {} - {}".format(response.status,
+                                                                                         response.data))
+        try:
+            result = json.loads(body.decode('utf-8'))
+        except Exception as e:
+            # Error is parsing json
+            raise GeneralError("Error parsing server response (%d) - %s. Got - %s" % (response.status, body, e))
+
+        return result
