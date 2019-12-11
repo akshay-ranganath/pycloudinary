@@ -1,4 +1,3 @@
-import urllib
 import logging
 from cloudinary.http_client import HttpClient
 from cloudinary.utils import json_encode
@@ -17,8 +16,26 @@ def fetch_alt_tags(
         public_id,
         worker_url
 ):
-    logger.debug(u"Cloud Name: {}, Worker URL: {}".format(cloud_name, worker_url))
-    response = None
+    """
+    A wrapper function that makes a call to the remote URL specified as worker_url and fetches the alt text tag.
+
+    This function expects the response to be in the following JSON format:
+    {
+        "alt_text": "something"
+    }
+
+    It may have any other dictionary along with this value but, alt_text is the only mandatory value.
+
+    :param cloud_name: Cloudinary Cloud name for the resource
+    :param api_key: API Key to use for fetching the context metadata
+    :param api_secret: API Key to use for fetching the context metadata
+    :param public_id: The actual resource for which we need the alt_text information
+    :param worker_url: The remote service that will make the Cloudinary API call and return the alt_text
+
+    :return: A dictionary object that will return the alt-text value if it was defined for the resource
+    """
+
+    logger.debug(u"Cloud Name: {}, Worker URL: {}, Public ID: ".format(cloud_name, worker_url,public_id))
 
     body = {
         "cloudName": cloud_name,
@@ -29,15 +46,3 @@ def fetch_alt_tags(
     client = HttpClient()
     response = client.post_json(worker_url, json_encode(body))
     return response
-
-
-if __name__=="__main__":
-    response = fetch_alt_tags(
-        'alttextgenerator',
-        '567644436894257',
-        '0EWAGKIvQJd_U3VWXWVi5SHf0uE',
-        'aqqcwtmphkpbqmqkix9x',
-        'https://testfetch.cloudinary.workers.dev/'
-    )
-
-    print(response)
