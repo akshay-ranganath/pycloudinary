@@ -110,9 +110,7 @@ class Config(object):
                 api_proxy=os.environ.get("CLOUDINARY_API_PROXY"),
             )
         elif os.environ.get("CLOUDINARY_URL"):
-            print("CLOUDINARY_URL")
             cloudinary_url = os.environ.get("CLOUDINARY_URL")
-            print(cloudinary_url)
             self._parse_cloudinary_url(cloudinary_url)
 
     def _parse_cloudinary_url(self, cloudinary_url):
