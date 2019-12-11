@@ -20,8 +20,10 @@ from cloudinary.exceptions import GeneralError
 from cloudinary.cache import responsive_breakpoints_cache
 from cloudinary.http_client import HttpClient
 from cloudinary.compat import urlparse, parse_qs
+from cloudinary.accessibility import fetch_alt_tags
 
 from platform import python_version
+import json
 
 CERT_KWARGS = {
     'cert_reqs': 'CERT_REQUIRED',
@@ -108,7 +110,9 @@ class Config(object):
                 api_proxy=os.environ.get("CLOUDINARY_API_PROXY"),
             )
         elif os.environ.get("CLOUDINARY_URL"):
+            print("CLOUDINARY_URL")
             cloudinary_url = os.environ.get("CLOUDINARY_URL")
+            print(cloudinary_url)
             self._parse_cloudinary_url(cloudinary_url)
 
     def _parse_cloudinary_url(self, cloudinary_url):
@@ -534,7 +538,25 @@ class CloudinaryResource(object):
         if src:
             attrs["src"] = src
 
-        return u"<img {0}/>".format(utils.html_attrs(attrs))
+
+
+        if 'worker_url' in attrs:
+            alt_text_url = attrs['worker_url']
+            del attrs['worker_url']
+            remote_response = fetch_alt_tags(
+                config().cloud_name,
+                config().api_key,
+                config().api_secret,
+                self.public_id,
+                alt_text_url
+            )
+            if 'alt_text' in remote_response:
+                alt_text =  remote_response['alt_text']
+            else:
+                alt_text = ''
+            return u"<img {} alt-text={}/>".format(utils.html_attrs(attrs), alt_text)
+        else:
+            return u"<img {0}/>".format(utils.html_attrs(attrs))
 
     def video_thumbnail(self, **options):
         self.default_poster_options(options)
