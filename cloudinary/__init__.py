@@ -538,21 +538,16 @@ class CloudinaryResource(object):
 
 
 
-        if 'worker_url' in attrs:
-            alt_text_url = attrs['worker_url']
+        if 'worker_url' in options:
+            remote_response = fetch_alt_tags(self.public_id,
+                                             options['worker_url'])
+
             del attrs['worker_url']
-            remote_response = fetch_alt_tags(
-                config().cloud_name,
-                config().api_key,
-                config().api_secret,
-                self.public_id,
-                alt_text_url
-            )
             if 'alt_text' in remote_response:
                 alt_text =  remote_response['alt_text']
             else:
                 alt_text = ''
-            return u"<img {} alt-text={}/>".format(utils.html_attrs(attrs), alt_text)
+            return u"<img {} alt-text=\"{}\"/>".format(utils.html_attrs(attrs), alt_text)
         else:
             return u"<img {0}/>".format(utils.html_attrs(attrs))
 
