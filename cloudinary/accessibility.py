@@ -1,4 +1,6 @@
 import logging
+import urllib3
+
 from cloudinary.http_client import HttpClient
 from cloudinary.utils import json_encode
 
@@ -30,14 +32,16 @@ def fetch_alt_tags(
 
     :return: JSON object that will include the alt-text if one is present
     """
-    body = {
-        "cloudName": cloudinary.config().cloud_name,
-        "apiKey": cloudinary.config().api_key,
-        "apiSecret": cloudinary.config().api_secret,
-        "publicId": public_id
-    }
+    url = f"{remote_url}{cloudinary.config().cloud_name}/{public_id}"
+
+    req_headers = urllib3.make_headers(
+        basic_auth=f"{cloudinary.config().api_key}:{cloudinary.config().api_secret}",
+        user_agent=cloudinary.get_user_agent()
+    )
+    logger.debug(f"making a call to {url} with headers {req_headers}")
+
     client = HttpClient()
-    response = client.post_json(remote_url, json_encode(body))
+    response = client.get_json(url,headers=req_headers)
     return response
 
 
